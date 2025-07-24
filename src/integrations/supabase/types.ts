@@ -14,13 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notes: {
+        Row: {
+          created_at: string
+          id: string
+          pdf_url: string
+          subject_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pdf_url: string
+          subject_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pdf_url?: string
+          subject_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          access: boolean
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          access?: boolean
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          access?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          created_at: string
+          id: string
+          subject_id: string
+          title: string
+          youtube_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          subject_id: string
+          title: string
+          youtube_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          subject_id?: string
+          title?: string
+          youtube_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      user_has_access: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
