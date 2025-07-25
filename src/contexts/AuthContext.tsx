@@ -6,6 +6,7 @@ interface UserData {
   id: string;
   email: string;
   access: boolean;
+  role: string;
   created_at: string;
 }
 

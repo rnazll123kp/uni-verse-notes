@@ -18,6 +18,7 @@ interface User {
   id: string;
   email: string;
   access: boolean;
+  role: string;
   created_at: string;
 }
 
@@ -45,7 +46,7 @@ interface VideoContent {
 }
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -61,14 +62,20 @@ const Admin = () => {
   const [newVideo, setNewVideo] = useState({ title: '', youtube_url: '', subject_id: '' });
 
   useEffect(() => {
-    // Check if user is admin (replace with your admin email)
-    if (!user || user.email !== 'admin@example.com') {
+    // Check if user is authenticated
+    if (!user) {
+      navigate('/');
+      return;
+    }
+    
+    // Check if user has admin role
+    if (userData && userData.role !== 'admin') {
       navigate('/');
       return;
     }
     
     fetchData();
-  }, [user, navigate]);
+  }, [user, userData, navigate]);
 
   const fetchData = async () => {
     try {
