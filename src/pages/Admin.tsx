@@ -180,6 +180,10 @@ const Admin = () => {
       // Refetch current user data if their own role was changed
       if (userData && userId === userData.id) {
         await refetchUserData();
+        // If user just made themselves non-admin, redirect to dashboard
+        if (newRole !== 'admin') {
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       console.error('Error updating user role:', error);
