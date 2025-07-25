@@ -16,6 +16,7 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refetchUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -92,12 +93,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
   };
 
+  const refetchUserData = async () => {
+    if (user?.email) {
+      await fetchUserData(user.email);
+    }
+  };
+
   const value = {
     user,
     session,
     userData,
     loading,
     signOut,
+    refetchUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

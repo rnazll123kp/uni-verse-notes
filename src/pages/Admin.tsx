@@ -46,7 +46,7 @@ interface VideoContent {
 }
 
 const Admin = () => {
-  const { user, userData } = useAuth();
+  const { user, userData, refetchUserData } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -143,11 +143,49 @@ const Admin = () => {
         title: "Success",
         description: `User access ${!currentAccess ? 'granted' : 'revoked'}`,
       });
+      
+      // Refetch current user data if their own access was changed
+      if (userData && userId === userData.id) {
+        await refetchUserData();
+      }
     } catch (error) {
       console.error('Error updating user access:', error);
       toast({
         title: "Error",
         description: "Failed to update user access",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleUserRole = async (userId: string, currentRole: string) => {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, role: newRole } : user
+      ));
+
+      toast({
+        title: "Success",
+        description: `User role updated to ${newRole}`,
+      });
+      
+      // Refetch current user data if their own role was changed
+      if (userData && userId === userData.id) {
+        await refetchUserData();
+      }
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role",
         variant: "destructive",
       });
     }
@@ -404,14 +442,27 @@ const Admin = () => {
                           Joined: {new Date(user.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Label htmlFor={`access-${user.id}`}>Access</Label>
-                        <Switch
-                          id={`access-${user.id}`}
-                          checked={user.access}
-                          onCheckedChange={() => toggleUserAccess(user.id, user.access)}
-                        />
-                      </div>
+                       <div className="flex items-center space-x-4">
+                         <div className="flex items-center space-x-2">
+                           <Label htmlFor={`access-${user.id}`}>Access</Label>
+                           <Switch
+                             id={`access-${user.id}`}
+                             checked={user.access}
+                             onCheckedChange={() => toggleUserAccess(user.id, user.access)}
+                           />
+                         </div>
+                         <div className="flex items-center space-x-2">
+                           <Label htmlFor={`role-${user.id}`}>Role</Label>
+                           <Switch
+                             id={`role-${user.id}`}
+                             checked={user.role === 'admin'}
+                             onCheckedChange={() => toggleUserRole(user.id, user.role)}
+                           />
+                           <span className="text-sm text-muted-foreground">
+                             {user.role}
+                           </span>
+                         </div>
+                       </div>
                     </div>
                   ))}
                 </div>
