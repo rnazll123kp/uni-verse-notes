@@ -3,7 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Video, LogOut } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { FileText, Video, LogOut, Play, Download, BookOpen } from 'lucide-react';
+import defaultSubjectImage from '@/assets/default-subject.jpg';
 
 interface Subject {
   id: string;
@@ -121,51 +123,94 @@ const Dashboard = () => {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Educational Notes</h1>
-          <Button onClick={signOut} variant="outline">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            {userData?.is_admin && (
+              <Button onClick={() => window.location.href = '/admin'} variant="secondary">
+                Admin Panel
+              </Button>
+            )}
+            <Button onClick={signOut} variant="outline">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {subjects.map((subject) => {
             const subjectNotes = getSubjectNotes(subject.id);
             const subjectVideos = getSubjectVideos(subject.id);
+            const totalContent = subjectNotes.length + subjectVideos.length;
 
             return (
-              <Card key={subject.id} className="flex flex-col">
-                <CardHeader>
-                  <CardTitle>{subject.name}</CardTitle>
-                  {subject.description && (
-                    <CardDescription>{subject.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="flex-1">
+              <Card key={subject.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+                {/* Subject Image Header */}
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={defaultSubjectImage} 
+                    alt={subject.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-white font-bold text-xl mb-1">{subject.name}</h3>
+                    {subject.description && (
+                      <p className="text-white/90 text-sm line-clamp-2">{subject.description}</p>
+                    )}
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                      {totalContent} items
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Content Sections */}
+                <CardContent className="p-6">
+                  {/* Quick Stats */}
+                  <div className="flex items-center gap-4 mb-6">
+                    {subjectNotes.length > 0 && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <FileText className="w-4 h-4 mr-1" />
+                        {subjectNotes.length} Notes
+                      </div>
+                    )}
+                    {subjectVideos.length > 0 && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Video className="w-4 h-4 mr-1" />
+                        {subjectVideos.length} Videos
+                      </div>
+                    )}
+                  </div>
+
                   {/* Notes Section */}
                   {subjectNotes.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="font-semibold mb-3 flex items-center">
-                        <FileText className="w-4 h-4 mr-2" />
-                        Notes ({subjectNotes.length})
+                      <h4 className="font-semibold mb-3 flex items-center text-sm">
+                        <FileText className="w-4 h-4 mr-2 text-primary" />
+                        Notes & Documents
                       </h4>
                       <div className="space-y-2">
-                        {subjectNotes.map((note) => (
-                          <div key={note.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">{note.title}</span>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => window.open(note.pdf_url, '_blank')}
-                              >
-                                <FileText className="w-3 h-3 mr-1" />
-                                PDF
-                              </Button>
-                            </div>
+                        {subjectNotes.slice(0, 3).map((note) => (
+                          <div key={note.id} className="flex items-center justify-between p-2 rounded-lg border hover:bg-accent/50 transition-colors">
+                            <span className="text-sm font-medium truncate mr-2">{note.title}</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => window.open(note.pdf_url, '_blank')}
+                              className="flex-shrink-0"
+                            >
+                              <Download className="w-3 h-3" />
+                            </Button>
                           </div>
                         ))}
+                        {subjectNotes.length > 3 && (
+                          <p className="text-xs text-muted-foreground text-center py-1">
+                            +{subjectNotes.length - 3} more notes
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -173,37 +218,54 @@ const Dashboard = () => {
                   {/* Videos Section */}
                   {subjectVideos.length > 0 && (
                     <div>
-                      <h4 className="font-semibold mb-3 flex items-center">
-                        <Video className="w-4 h-4 mr-2" />
-                        Videos ({subjectVideos.length})
+                      <h4 className="font-semibold mb-3 flex items-center text-sm">
+                        <Video className="w-4 h-4 mr-2 text-primary" />
+                        Video Lectures
                       </h4>
-                      <div className="space-y-3">
-                        {subjectVideos.map((video) => {
+                      <div className="space-y-2">
+                        {subjectVideos.slice(0, 2).map((video) => {
                           const videoId = getYouTubeVideoId(video.youtube_url);
                           return (
-                            <div key={video.id} className="border rounded-lg overflow-hidden">
+                            <div key={video.id} className="border rounded-lg overflow-hidden group/video">
                               {videoId && (
-                                <div className="aspect-video">
-                                  <iframe
-                                    src={`https://www.youtube.com/embed/${videoId}`}
-                                    title={video.title}
-                                    className="w-full h-full"
-                                    allowFullScreen
+                                <div className="relative aspect-video bg-muted">
+                                  <img 
+                                    src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+                                    alt={video.title}
+                                    className="w-full h-full object-cover"
                                   />
+                                  <div className="absolute inset-0 bg-black/20 group-hover/video:bg-black/40 transition-colors flex items-center justify-center">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => window.open(video.youtube_url, '_blank')}
+                                      className="bg-white/90 text-black hover:bg-white"
+                                    >
+                                      <Play className="w-4 h-4 mr-1" />
+                                      Watch
+                                    </Button>
+                                  </div>
                                 </div>
                               )}
                               <div className="p-3">
-                                <p className="text-sm font-medium">{video.title}</p>
+                                <p className="text-sm font-medium line-clamp-2">{video.title}</p>
                               </div>
                             </div>
                           );
                         })}
+                        {subjectVideos.length > 2 && (
+                          <p className="text-xs text-muted-foreground text-center py-1">
+                            +{subjectVideos.length - 2} more videos
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
 
-                  {subjectNotes.length === 0 && subjectVideos.length === 0 && (
-                    <p className="text-muted-foreground text-sm">No content available yet.</p>
+                  {totalContent === 0 && (
+                    <div className="text-center py-8">
+                      <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/50 mb-2" />
+                      <p className="text-muted-foreground text-sm">No content available yet</p>
+                    </div>
                   )}
                 </CardContent>
               </Card>

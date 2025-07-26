@@ -7,6 +7,7 @@ interface UserData {
   email: string;
   access: boolean;
   role: string;
+  is_admin: boolean;
   created_at: string;
 }
 
@@ -48,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      setUserData(data);
+      setUserData(data as UserData);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
