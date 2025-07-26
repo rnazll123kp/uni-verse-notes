@@ -14,34 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      notes: {
+      chapters: {
         Row: {
           created_at: string
+          description: string | null
           id: string
-          pdf_url: string
           subject_id: string
           title: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
-          pdf_url: string
           subject_id: string
           title: string
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
-          pdf_url?: string
           subject_id?: string
           title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "notes_subject_id_fkey"
+            foreignKeyName: "chapters_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          id: string
+          pdf_url: string
+          title: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          id?: string
+          pdf_url: string
+          title: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          id?: string
+          pdf_url?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
         ]
@@ -51,18 +83,21 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          image_url: string | null
           name: string
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           name: string
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           name?: string
         }
         Relationships: []
@@ -96,32 +131,32 @@ export type Database = {
       }
       videos: {
         Row: {
+          chapter_id: string
           created_at: string
           id: string
-          subject_id: string
           title: string
           youtube_url: string
         }
         Insert: {
+          chapter_id: string
           created_at?: string
           id?: string
-          subject_id: string
           title: string
           youtube_url: string
         }
         Update: {
+          chapter_id?: string
           created_at?: string
           id?: string
-          subject_id?: string
           title?: string
           youtube_url?: string
         }
         Relationships: [
           {
-            foreignKeyName: "videos_subject_id_fkey"
-            columns: ["subject_id"]
+            foreignKeyName: "videos_chapter_id_fkey"
+            columns: ["chapter_id"]
             isOneToOne: false
-            referencedRelation: "subjects"
+            referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
         ]
